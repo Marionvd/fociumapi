@@ -7,6 +7,7 @@ import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.exception.BadRequestException;
 import dev.dumbanov.fociumapi.service.AIService;
 import dev.dumbanov.fociumapi.service.AwarderService;
+import dev.dumbanov.fociumapi.service.ProofValidationService;
 import dev.dumbanov.fociumapi.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class TaskController {
     private final TaskService taskService;
     private final AIService aiService;
     private final AwarderService awarderService;
+    private final ProofValidationService proofValidationService;
 
 
 
@@ -82,6 +84,8 @@ public class TaskController {
     public ResponseEntity<?> completeTask(@AuthenticationPrincipal Profile profile, @PathVariable UUID taskUuid, MultipartFile file) {
         try {
             var task = taskService.getTask(taskUuid);
+
+            proofValidationService.validateProofTimestamp(file, task);
 
             var res = aiService.evaluateTaskCompletion(task.getTitle(), task.getDescription(), file);
 

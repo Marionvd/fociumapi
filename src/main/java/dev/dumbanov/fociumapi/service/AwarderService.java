@@ -65,6 +65,13 @@ public class AwarderService {
         checkForAchievementCompletion(PrerequisiteType.POINTS_AMOUNT, profile);
     }
 
+    public void awardShowdownWin(Profile winner) {
+        winner.setPoints(winner.getPoints() + 100);
+        winner.setTotalPoints(winner.getTotalPoints() + 100);
+        profileRepository.save(winner);
+        checkForAchievementCompletion(PrerequisiteType.POINTS_AMOUNT, winner);
+    }
+
     public void manageDayStreak(Profile profile) {
         if(profile.getLastLogin() == null) {
             profile.setDayStreak(1);

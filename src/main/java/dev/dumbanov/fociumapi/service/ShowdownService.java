@@ -15,6 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ShowdownService {
     private final ShowdownRepository showdownRepository;
+    private final AwarderService awarderService;
 
     /**
      * Create a new showdown between two profiles.
@@ -91,7 +92,13 @@ public class ShowdownService {
         }
         // If tied, winner remains null
 
-        return showdownRepository.save(showdown);
+        Showdown saved = showdownRepository.save(showdown);
+
+        if (saved.getWinner() != null) {
+            awarderService.awardShowdownWin(saved.getWinner());
+        }
+
+        return saved;
     }
 
     /**
