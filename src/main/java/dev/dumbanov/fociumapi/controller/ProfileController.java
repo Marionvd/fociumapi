@@ -16,4 +16,5 @@ public class ProfileController {
         return ResponseEntity.ok(ProfileOutput.of(profile));
 
     }
+
 }

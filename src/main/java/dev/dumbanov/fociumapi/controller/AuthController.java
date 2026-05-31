@@ -1,7 +1,10 @@
 package dev.dumbanov.fociumapi.controller;
 
+import com.openai.errors.NotFoundException;
 import dev.dumbanov.fociumapi.dto.auth.PasswordLoginInput;
 import dev.dumbanov.fociumapi.dto.auth.PasswordRegisterInput;
+import dev.dumbanov.fociumapi.dto.auth.PasswordResetInput;
+import dev.dumbanov.fociumapi.dto.auth.PasswordResetRequestInput;
 import dev.dumbanov.fociumapi.dto.profile.ProfileOutput;
 import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.exception.BadRequestException;
@@ -10,18 +13,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Map;
@@ -30,6 +34,7 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
     private final SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
@@ -49,7 +54,7 @@ public class AuthController {
 
         securityContextHolderStrategy.setContext(context);
 
-        securityContextRepository.saveContext(context, request,  response);
+        securityContextRepository.saveContext(context, request, response);
     }
 
     @PostMapping("/password-register")
@@ -59,7 +64,7 @@ public class AuthController {
 
             createSession(profile, request, response);
 
-            return ResponseEntity.created(URI.create("/api/profiles/"+profile.getUuid()))
+            return ResponseEntity.created(URI.create("/api/profiles/" + profile.getUuid()))
                     .body(ProfileOutput.of(profile));
         } catch (BadRequestException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -75,6 +80,41 @@ public class AuthController {
 
             createSession(profile, request, response);
             return ResponseEntity.ok(ProfileOutput.of(profile));
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/request-password-reset")
+    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody PasswordResetRequestInput input) {
+        try {
+            authService.requestPasswordResetTicket(input.email());
+            return ResponseEntity.ok(Map.of("message", "Password reset email sent successfully."));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (MailException e) {
+            logger.warn(e.getMessage());
+            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to send password reset email. Please try again later."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(HttpServletRequest request, HttpServletResponse response, @RequestParam String code, @Valid @RequestBody PasswordResetInput input) {
+        try {
+            var profile = authService.resetPassword(code, input.newPassword());
+
+            createSession(profile, request, response);
+            return ResponseEntity.ok(Map.of("message", "Password was reset successfully"));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         } catch (BadRequestException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (RuntimeException e) {

@@ -34,7 +34,7 @@ public class Profile implements UserDetails {
     @Column()
     private LocalDateTime lastLogin;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(
             joinColumns = {
                     @JoinColumn(name = "profile_uuid",referencedColumnName = "uuid"),
