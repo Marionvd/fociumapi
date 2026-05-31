@@ -28,6 +28,10 @@ public class Profile implements UserDetails {
     @Column()
     private String password;
 
+    private Integer points = 0;
+
+    private Integer level = 0;
+
     @Column()
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -37,12 +41,10 @@ public class Profile implements UserDetails {
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(
             joinColumns = {
-                    @JoinColumn(name = "profile_uuid",referencedColumnName = "uuid"),
-                    @JoinColumn(name = "profile_email", referencedColumnName = "email")
+                    @JoinColumn(name = "profile_uuid",referencedColumnName = "uuid")
             },
             inverseJoinColumns = {
-                    @JoinColumn(name = "role_uuid", referencedColumnName = "uuid"),
-                    @JoinColumn(name = "role_name", referencedColumnName = "name")
+                    @JoinColumn(name = "role_uuid", referencedColumnName = "uuid")
             }
     )
     private Set<Role> roles = new HashSet<>();
