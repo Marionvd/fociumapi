@@ -9,6 +9,10 @@ import java.util.UUID;
 public record ProfileOutput(
         UUID uuid,
         String email,
+        Integer points,
+        Integer totalPoints,
+        Integer dayStreak,
+        Integer level,
         LocalDateTime createdAt,
         LocalDateTime lastLogin,
         String[] roles
@@ -17,6 +21,10 @@ public record ProfileOutput(
         return new ProfileOutput(
                 profile.getUuid(),
                 profile.getEmail(),
+                profile.getPoints(),
+                profile.getTotalPoints(),
+                profile.getLevel(),
+                profile.getDayStreak(),
                 profile.getCreatedAt(),
                 profile.getLastLogin(),
                 profile.getRoles().stream().map(Role::getName).toArray(String[]::new)

@@ -29,8 +29,10 @@ public class Profile implements UserDetails {
     private String password;
 
     private Integer points = 0;
+    private Integer totalPoints=0;
 
     private Integer level = 0;
+    private Integer dayStreak = 1;
 
     @Column()
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -48,6 +50,17 @@ public class Profile implements UserDetails {
             }
     )
     private Set<Role> roles = new HashSet<>();
+
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @JoinTable(
+            joinColumns = {
+                    @JoinColumn(name = "profile_uuid",referencedColumnName = "uuid")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "achievement_uuid", referencedColumnName = "uuid")
+            }
+    )
+    private Set<Achievement> achievements = new HashSet<>();
 
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {

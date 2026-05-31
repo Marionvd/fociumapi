@@ -1,0 +1,19 @@
+[
+  {
+    "name": "First Steps",
+    "description": "Complete your first task",
+    "rewardPoints": 10,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 1 }
+    ]
+  },
+  {
+    "name": "Three Day Streak",
+    "description": "Complete a task three days in a row",
+    "rewardPoints": 30,
+    "prerequisites": [
+      { "type": "DAY_STREAK", "requiredAmount": 3 }
+    ]
+  }
+]
+

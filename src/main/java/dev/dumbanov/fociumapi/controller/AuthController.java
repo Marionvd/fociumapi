@@ -9,6 +9,7 @@ import dev.dumbanov.fociumapi.dto.profile.ProfileOutput;
 import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.exception.BadRequestException;
 import dev.dumbanov.fociumapi.service.AuthService;
+import dev.dumbanov.fociumapi.service.AwarderService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -36,6 +37,7 @@ import java.util.Map;
 public class AuthController {
     private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
+    private final AwarderService awarderService;
     private final SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
 
@@ -77,7 +79,7 @@ public class AuthController {
     public ResponseEntity<?> login(HttpServletRequest request, HttpServletResponse response, @Valid @RequestBody PasswordLoginInput input) {
         try {
             Profile profile = authService.login(input.email(), input.password());
-
+awarderService.manageDayStreak(profile);
             createSession(profile, request, response);
             return ResponseEntity.ok(ProfileOutput.of(profile));
         } catch (UsernameNotFoundException e) {

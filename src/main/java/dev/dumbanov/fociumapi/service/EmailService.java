@@ -20,16 +20,19 @@ public class EmailService {
 
     String buildResetPasswordTemplate(String email, String link) {
         return """
-                Здравейте,
-                
-                Получихме заяква за промяна на парола в приложението Focium за %s.
-                Ако вие се пратили тази заявка, моля последвайте %s за да продължите с промяната на Вашата парола.
-                Ако не се пратили тази заявка, може спокойно да игнорирате този имейл.
-                
-                Поздрави,
-                Екипът на Focium
-                """.formatted(email, link);
+            Hello,
 
+            We received a request to reset the password for your Focium account (%s).
+
+            If you made this request, please use the link below to set a new password:
+            %s
+
+            If you did not request a password reset, you can safely ignore this email.
+            Your password will remain unchanged.
+
+            Best regards,
+            The Focium Team
+            """.formatted(email, link);
     }
 
     public void sendPasswordResetEmail(String email, UUID code) {

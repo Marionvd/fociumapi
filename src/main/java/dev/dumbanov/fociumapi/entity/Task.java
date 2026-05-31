@@ -26,7 +26,7 @@ public class Task {
 
     private LocalDateTime deadline = null;
 
-    private Integer awardedPoints = null;
+    private Integer awardedPoints = 0;
 
     @Column(length = 500)
     private String aiFeedback = null;

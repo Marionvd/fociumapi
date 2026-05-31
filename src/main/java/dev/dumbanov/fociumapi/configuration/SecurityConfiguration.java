@@ -25,7 +25,12 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/profiles/**").hasRole("USER")
+                                .requestMatchers(
+                                        "/api/profiles/**",
+                                        "/api/achievements/**",
+                                        "/api/tasks/**"
+                                        ).hasRole("USER")
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .userDetailsService(profileService)
