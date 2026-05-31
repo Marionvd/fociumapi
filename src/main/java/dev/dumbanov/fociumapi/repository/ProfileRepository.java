@@ -15,4 +15,6 @@ public interface ProfileRepository extends JpaRepository<Profile, UUID> {
     boolean existsProfileByEmail(String email);
 
     List<Profile> findAllByOrderByTotalPointsDesc(Pageable pageable);
+
+    List<Profile> findTop10ByEmailContainingIgnoreCaseOrderByTotalPointsDesc(String email);
 }

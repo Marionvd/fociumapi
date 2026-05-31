@@ -68,6 +68,18 @@ public class TaskController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<?> getUserTasks(@AuthenticationPrincipal Profile profile) {
+        try {
+            var tasks = taskService.getProfileTasks(profile);
+            return ResponseEntity.ok(tasks.stream().map(TaskOutput::of).toList());
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/{taskUuid}")
     public ResponseEntity<?> getTask(@AuthenticationPrincipal Profile profile, @PathVariable UUID taskUuid) {
         try {

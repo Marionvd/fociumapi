@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Service
 public class ProofValidationService {
@@ -34,7 +35,19 @@ public class ProofValidationService {
             if (directory == null) {
                 return null;
             }
-            Date date = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+            // Pass system timezone — EXIF DateTimeOriginal has no embedded TZ,
+            // so without this the library returns null for most real camera photos.
+            Date date = directory.getDate(
+                    ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL,
+                    TimeZone.getDefault()
+            );
+            if (date == null) {
+                // Fall back to TAG_DATETIME (file modification time baked into EXIF)
+                date = directory.getDate(
+                        ExifSubIFDDirectory.TAG_DATETIME,
+                        TimeZone.getDefault()
+                );
+            }
             if (date == null) {
                 return null;
             }

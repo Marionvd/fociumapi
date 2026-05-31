@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,6 +40,10 @@ public class ShowdownService {
         showdown.setProfile2Points(0);
 
         return showdownRepository.save(showdown);
+    }
+
+    public List<Showdown>getShowdownsForProfile(Profile profile) {
+        return showdownRepository.findShowdownsByProfile(profile);
     }
 
     /**

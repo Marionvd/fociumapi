@@ -9,6 +9,7 @@ import dev.dumbanov.fociumapi.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -16,6 +17,9 @@ import java.util.UUID;
 public class TaskService {
 	private final TaskRepository taskRepository;
 
+	public List<Task> getProfileTasks(Profile profile) {
+		return taskRepository.findAllByProfile(profile);
+	}
 	public Task getTask(UUID uuid) {
 		if(!taskRepository.existsById(uuid)) {
 			throw new BadRequestException("Task not found.");
