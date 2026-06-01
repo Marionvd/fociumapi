@@ -35,8 +35,12 @@ public class SecurityConfiguration {
                                 .requestMatchers(
                                         "/api/profiles/**",
                                         "/api/achievements/**",
-                                        "/api/tasks/**"
-                                        ).hasRole("USER")
+                                        "/api/tasks/**",
+                                        "/api/shop/**",
+                                        "/api/showdowns/**",
+                                        "/api/showdown-requests/**",
+                                        "/api/leaderboard/**"
+                                ).hasRole("USER")
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )

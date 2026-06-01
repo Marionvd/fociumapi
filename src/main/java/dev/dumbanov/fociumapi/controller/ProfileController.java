@@ -1,13 +1,12 @@
 package dev.dumbanov.fociumapi.controller;
 
-import com.cloudinary.Cloudinary;
 import dev.dumbanov.fociumapi.dto.profile.ProfileOutput;
-import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.repository.ProfileRepository;
 import dev.dumbanov.fociumapi.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,6 +49,18 @@ public class ProfileController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (IOException e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to upload profile picture."));
+        }
+    }
+
+    @GetMapping("/me/perks")
+    public ResponseEntity<?> getPerks(@AuthenticationPrincipal String email) {
+        try {
+            var perks = profileService.getProfileItems(email);
+            return ResponseEntity.ok(perks);
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
 }

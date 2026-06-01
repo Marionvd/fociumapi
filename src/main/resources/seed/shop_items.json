@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Mobile Pass",
+    "description": "Unlock full mobile app access for 30 days. Complete tasks, manage showdowns and check the leaderboard from your phone.",
+    "icon": "📱",
+    "perkType": "APPLICATION_ACCESS",
+    "price": 200,
+    "durationMinutes": 43200,
+    "pointsBoostPercent": null,
+    "isActive": true
+  },
+  {
+    "name": "Points Surge",
+    "description": "Earn 50% more points from every task completion for the next 60 minutes. Stack multiple Surges for bigger gains.",
+    "icon": "⚡",
+    "perkType": "POINTS_BOOST",
+    "price": 150,
+    "durationMinutes": 60,
+    "pointsBoostPercent": 50,
+    "isActive": true
+  },
+  {
+    "name": "Mega Surge",
+    "description": "Double your task points for 30 minutes. Perfect before a focused work session.",
+    "icon": "🔥",
+    "perkType": "POINTS_BOOST",
+    "price": 250,
+    "durationMinutes": 30,
+    "pointsBoostPercent": 100,
+    "isActive": true
+  },
+  {
+    "name": "Streak Shield",
+    "description": "Save your day streak once. If you miss a login day this shield activates automatically — your streak stays intact.",
+    "icon": "🛡️",
+    "perkType": "STREAK_SHIELD",
+    "price": 100,
+    "durationMinutes": null,
+    "pointsBoostPercent": null,
+    "isActive": true
+  }
+]

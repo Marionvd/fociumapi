@@ -2,6 +2,7 @@ package dev.dumbanov.fociumapi.service;
 
 import com.cloudinary.Cloudinary;
 import dev.dumbanov.fociumapi.entity.Profile;
+import dev.dumbanov.fociumapi.entity.ShopItem;
 import dev.dumbanov.fociumapi.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +47,12 @@ public class ProfileService implements UserDetailsService {
         var secureUrl = uploadResult.get("secure_url").toString();
         profile.setPfp(secureUrl);
         return profileRepository.save(profile);
+    }
+
+    public Set<ShopItem> getProfileItems(String email) {
+        var profile = getProfileByEmail(email);
+        if(profile == null)
+            throw new UsernameNotFoundException("Profile with email " + email + " not found");
+        return profile.getShopItems();
     }
 }
