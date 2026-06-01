@@ -1,6 +1,8 @@
 package dev.dumbanov.fociumapi.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.dumbanov.fociumapi.entity.ShopItem
 import dev.dumbanov.fociumapi.entity.types.PerkType
 import dev.dumbanov.fociumapi.repository.ShopItemRepository
@@ -16,7 +18,7 @@ class ShopItemSeeder(
 ) : ApplicationListener<ContextRefreshedEvent> {
 
     private val log = LoggerFactory.getLogger(ShopItemSeeder::class.java)
-    private val mapper = ObjectMapper()
+    private val mapper = ObjectMapper().registerKotlinModule()
 
     private data class Seed(
         val name: String,
@@ -37,10 +39,9 @@ class ShopItemSeeder(
         }
 
         try {
-            val seeds: List<Seed> = mapper.readValue(
-                resource.inputStream,
-                mapper.typeFactory.constructCollectionType(List::class.java, Seed::class.java)
-            )
+            // Use TypeReference with the registered Kotlin module so Jackson properly
+            // deserializes Kotlin data classes.
+            val seeds: List<Seed> = mapper.readValue(resource.inputStream, object : TypeReference<List<Seed>>() {})
 
             for (seed in seeds) {
                 if (shopItemRepository.existsByName(seed.name)) {
@@ -61,7 +62,8 @@ class ShopItemSeeder(
                 log.info("Seeded shop item: {}", seed.name)
             }
         } catch (e: Exception) {
-            log.warn("Failed to seed shop items: {}", e.message)
+            // Log the full exception so we can see the root cause during startup
+            log.warn("Failed to seed shop items", e)
         }
     }
 }

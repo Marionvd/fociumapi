@@ -118,6 +118,11 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Jackson Kotlin module to allow Jackson to deserialize Kotlin data classes correctly -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

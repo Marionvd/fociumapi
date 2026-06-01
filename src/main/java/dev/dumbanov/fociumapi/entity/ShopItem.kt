@@ -9,8 +9,9 @@ import java.util.UUID
 class ShopItem {
 
     @Id
+    @Column(name="uuid")
     @GeneratedValue(strategy = GenerationType.UUID)
-    var uuid: UUID? = null
+    lateinit var uuid: UUID
 
     @Column(nullable = false)
     var name: String = ""
@@ -22,7 +23,7 @@ class ShopItem {
     @Column(nullable = false)
     var icon: String = ""
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     var perkType: PerkType = PerkType.POINTS_BOOST
 
