@@ -46,7 +46,7 @@ public class AuthController {
 
     void createSession(Profile profile, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(
-                profile,
+                profile.getEmail(),
                 null,
                 profile.getAuthorities()
         );

@@ -5,10 +5,12 @@ import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.entity.Showdown;
 import dev.dumbanov.fociumapi.exception.BadRequestException;
 import dev.dumbanov.fociumapi.repository.ProfileRepository;
+import dev.dumbanov.fociumapi.service.ProfileService;
 import dev.dumbanov.fociumapi.service.ShowdownService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,15 +22,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ShowdownController {
     private final ShowdownService showdownService;
-    private final ProfileRepository profileRepository;
+    private final ProfileService profileService;
 
     @GetMapping("/me")
-    public ResponseEntity<?> getMyShowdowns(@AuthenticationPrincipal Profile profile) {
+    public ResponseEntity<?> getMyShowdowns(@AuthenticationPrincipal String email) {
         try {
+            var profile = profileService.getProfileByEmail(email);
             List<Showdown> showdowns = showdownService.getShowdownsForProfile(profile);
             List<ShowdownOutput> output = showdowns.stream().map(ShowdownOutput::of).toList();
             return ResponseEntity.ok(output);
-        } catch (RuntimeException e) {
+        }catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+        catch (RuntimeException e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }

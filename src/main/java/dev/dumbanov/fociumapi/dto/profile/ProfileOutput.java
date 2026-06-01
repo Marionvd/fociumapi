@@ -9,6 +9,7 @@ import java.util.UUID;
 public record ProfileOutput(
         UUID uuid,
         String email,
+        String pfpUrl,
         Integer points,
         Integer totalPoints,
         Integer dayStreak,
@@ -21,6 +22,7 @@ public record ProfileOutput(
         return new ProfileOutput(
                 profile.getUuid(),
                 profile.getEmail(),
+                profile.getPfp(),
                 profile.getPoints(),
                 profile.getTotalPoints(),
                 profile.getLevel(),

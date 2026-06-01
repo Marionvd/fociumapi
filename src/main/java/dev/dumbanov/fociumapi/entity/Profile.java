@@ -34,6 +34,8 @@ public class Profile implements UserDetails {
     private Integer level = 0;
     private Integer dayStreak = 1;
 
+    private String pfp="";
+
     @Column()
     private LocalDateTime createdAt = LocalDateTime.now();
 

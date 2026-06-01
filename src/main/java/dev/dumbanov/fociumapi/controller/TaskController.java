@@ -5,10 +5,7 @@ import dev.dumbanov.fociumapi.dto.task.TaskOutput;
 import dev.dumbanov.fociumapi.dto.task.TaskUpdateInput;
 import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.exception.BadRequestException;
-import dev.dumbanov.fociumapi.service.AIService;
-import dev.dumbanov.fociumapi.service.AwarderService;
-import dev.dumbanov.fociumapi.service.ProofValidationService;
-import dev.dumbanov.fociumapi.service.TaskService;
+import dev.dumbanov.fociumapi.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +26,13 @@ public class TaskController {
     private final AIService aiService;
     private final AwarderService awarderService;
     private final ProofValidationService proofValidationService;
-
+    private final ProfileService profileService;
 
 
     @PostMapping
-    public ResponseEntity<?> createTask(@AuthenticationPrincipal Profile profile, @Valid @RequestBody TaskCreateInput input) {
+    public ResponseEntity<?> createTask(@AuthenticationPrincipal String email, @Valid @RequestBody TaskCreateInput input) {
         try {
+            var profile = profileService.getProfileByEmail(email);
             var task = taskService.createTask(profile, input);
             return ResponseEntity.created(URI.create("/api/tasks/" + task.getUuid())).body(TaskOutput.of(task));
         } catch (BadRequestException e) {
@@ -45,8 +43,9 @@ public class TaskController {
     }
 
     @PutMapping("/{taskUuid}")
-    public ResponseEntity<?> updateTask(@AuthenticationPrincipal Profile profile, @PathVariable UUID taskUuid, @RequestBody TaskUpdateInput input) {
+    public ResponseEntity<?> updateTask(@AuthenticationPrincipal String email, @PathVariable UUID taskUuid, @RequestBody TaskUpdateInput input) {
         try {
+            var profile = profileService.getProfileByEmail(email);
             var task = taskService.updateTask(profile, taskUuid, input);
             return ResponseEntity.ok(TaskOutput.of(task));
         } catch (BadRequestException e) {
@@ -57,8 +56,9 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskUuid}")
-    public ResponseEntity<?> deleteTask(@AuthenticationPrincipal Profile profile, @PathVariable UUID taskUuid) {
+    public ResponseEntity<?> deleteTask(@AuthenticationPrincipal String email, @PathVariable UUID taskUuid) {
         try {
+            var profile = profileService.getProfileByEmail(email);
             taskService.deleteTask(profile, taskUuid);
             return ResponseEntity.ok(Map.of("message", "Task deleted successfully."));
         } catch (BadRequestException e) {
@@ -69,8 +69,9 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getUserTasks(@AuthenticationPrincipal Profile profile) {
+    public ResponseEntity<?> getUserTasks(@AuthenticationPrincipal String email) {
         try {
+            var profile = profileService.getProfileByEmail(email);
             var tasks = taskService.getProfileTasks(profile);
             return ResponseEntity.ok(tasks.stream().map(TaskOutput::of).toList());
         } catch (BadRequestException e) {
@@ -81,7 +82,7 @@ public class TaskController {
     }
 
     @GetMapping("/{taskUuid}")
-    public ResponseEntity<?> getTask(@AuthenticationPrincipal Profile profile, @PathVariable UUID taskUuid) {
+    public ResponseEntity<?> getTask(@PathVariable UUID taskUuid) {
         try {
             var task = taskService.getTask(taskUuid);
             return ResponseEntity.ok(TaskOutput.of(task));
@@ -93,8 +94,9 @@ public class TaskController {
     }
 
     @PostMapping("/{taskUuid}/complete")
-    public ResponseEntity<?> completeTask(@AuthenticationPrincipal Profile profile, @PathVariable UUID taskUuid, MultipartFile file) {
+    public ResponseEntity<?> completeTask(@AuthenticationPrincipal String email, @PathVariable UUID taskUuid, MultipartFile file) {
         try {
+            var profile = profileService.getProfileByEmail(email);
             var task = taskService.getTask(taskUuid);
 
             proofValidationService.validateProofTimestamp(file, task);
