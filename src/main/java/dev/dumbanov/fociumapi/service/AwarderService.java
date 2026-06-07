@@ -18,29 +18,26 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AwarderService {
+
     private final ProfileRepository profileRepository;
     private final AchievementRepository achievementRepository;
     private final AchievementPrerequisiteRepository achievementPrerequisiteRepository;
     private final TaskRepository taskRepository;
+    private final PerkService perkService;
 
-    /**
-     * Checks prerequisites of the given type and unlocks any newly qualifying achievements.
-     * @return List of achievements that were just unlocked (empty if none).
-     */
+    // ── Achievements ──────────────────────────────────────────────────────────
+
     List<Achievement> checkForAchievementCompletion(PrerequisiteType prerequisiteType, Profile profile) {
         List<Achievement> newlyEarned = new ArrayList<>();
         var prerequisites = achievementPrerequisiteRepository.findAllByType(prerequisiteType);
 
         for (var prerequisite : prerequisites) {
-            if (profile.getAchievements().contains(prerequisite.getAchievement())) {
-                continue;
-            }
+            if (profile.getAchievements().contains(prerequisite.getAchievement())) continue;
 
             boolean qualifies = switch (prerequisiteType) {
                 case POINTS_AMOUNT -> prerequisite.getRequiredAmount() <= profile.getTotalPoints();
                 case DAY_STREAK    -> prerequisite.getRequiredAmount() <= profile.getDayStreak();
             };
-
             if (!qualifies) continue;
 
             profile.setTotalPoints(profile.getTotalPoints() + prerequisite.getAchievement().getRewardPoints());
@@ -49,36 +46,48 @@ public class AwarderService {
             profileRepository.save(profile);
             newlyEarned.add(prerequisite.getAchievement());
         }
-
         return newlyEarned;
     }
 
+    // ── Task completion ───────────────────────────────────────────────────────
+
     /**
-     * Awards points for completing a task and checks for newly unlocked achievements.
-     * @return List of achievements unlocked by this action.
+     * Result returned from {@link #awardTaskCompletion}.
+     * Carries both the newly-unlocked achievements and the boost that was active.
      */
-    public List<Achievement> awardTaskCompletion(TaskCompletionEvaluation evaluation, Task task, Profile profile) {
+    public record TaskAwardResult(List<Achievement> newAchievements, int boostPercent) {}
+
+    /**
+     * Awards points for completing a task, applying any active POINTS_BOOST perks.
+     * Returns the list of newly-unlocked achievements and the applied boost percentage.
+     */
+    public TaskAwardResult awardTaskCompletion(TaskCompletionEvaluation evaluation, Task task, Profile profile) {
         if (task.getAwardedPoints() != null && evaluation.points() <= task.getAwardedPoints()) {
-            return List.of();
+            return new TaskAwardResult(List.of(), 0);
         }
 
-        int pointsToAward = evaluation.points();
-        int previouslyAwarded = task.getAwardedPoints() == null ? 0 : task.getAwardedPoints();
+        // Apply any active points boost
+        int boostPercent = perkService.getTotalPointsBoostPercent(profile);
+        int basePoints   = evaluation.points();
+        int pointsToAward = boostPercent > 0
+                ? basePoints + (basePoints * boostPercent / 100)
+                : basePoints;
 
+        int previouslyAwarded = task.getAwardedPoints() == null ? 0 : task.getAwardedPoints();
         profile.setPoints(profile.getPoints() + pointsToAward - previouslyAwarded);
         profile.setTotalPoints(profile.getTotalPoints() + pointsToAward - previouslyAwarded);
+
         task.setAwardedPoints(pointsToAward);
         task.setAiFeedback(evaluation.feedback());
         taskRepository.save(task);
         profileRepository.save(profile);
 
-        return checkForAchievementCompletion(PrerequisiteType.POINTS_AMOUNT, profile);
+        List<Achievement> newAchievements = checkForAchievementCompletion(PrerequisiteType.POINTS_AMOUNT, profile);
+        return new TaskAwardResult(newAchievements, boostPercent);
     }
 
-    /**
-     * Awards the showdown winner 100 bonus points and checks for achievements.
-     * @return List of achievements unlocked by this action.
-     */
+    // ── Showdown win ──────────────────────────────────────────────────────────
+
     public List<Achievement> awardShowdownWin(Profile winner) {
         winner.setPoints(winner.getPoints() + 100);
         winner.setTotalPoints(winner.getTotalPoints() + 100);
@@ -86,16 +95,36 @@ public class AwarderService {
         return checkForAchievementCompletion(PrerequisiteType.POINTS_AMOUNT, winner);
     }
 
-    public void manageDayStreak(Profile profile) {
+    // ── Day streak ────────────────────────────────────────────────────────────
+
+    /**
+     * Updates the day streak on login.
+     * If the streak would break and the user has a STREAK_SHIELD, the shield is
+     * consumed and the streak is preserved.
+     */
+    public void manageDayStreak(String email) {
+        if(!profileRepository.existsProfileByEmail(email)) {
+            return;
+        }
+
+        var profile = profileRepository.findProfileByEmail(email);
         if (profile.getLastLogin() == null) {
             profile.setDayStreak(1);
         } else {
-            long daysBetween = java.time.Duration.between(profile.getLastLogin(), java.time.LocalDateTime.now()).toDays();
+            long daysBetween = java.time.Duration.between(
+                    profile.getLastLogin(), java.time.LocalDateTime.now()).toDays();
+
             if (daysBetween == 1) {
                 profile.setDayStreak(profile.getDayStreak() + 1);
                 checkForAchievementCompletion(PrerequisiteType.DAY_STREAK, profile);
+
             } else if (daysBetween > 1) {
-                profile.setDayStreak(1);
+                // Try to absorb the miss with a streak shield before resetting
+                boolean shielded = perkService.consumeStreakShield(profile);
+                if (!shielded) {
+                    profile.setDayStreak(1);
+                }
+                // If shielded: streak stays intact, the consumed shield is already saved
             }
         }
         profileRepository.save(profile);

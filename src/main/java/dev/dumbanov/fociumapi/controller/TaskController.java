@@ -4,7 +4,6 @@ import dev.dumbanov.fociumapi.dto.achievement.AchievementOutput;
 import dev.dumbanov.fociumapi.dto.task.TaskCreateInput;
 import dev.dumbanov.fociumapi.dto.task.TaskOutput;
 import dev.dumbanov.fociumapi.dto.task.TaskUpdateInput;
-import dev.dumbanov.fociumapi.entity.Achievement;
 import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.exception.BadRequestException;
 import dev.dumbanov.fociumapi.service.*;
@@ -106,13 +105,14 @@ public class TaskController {
 
             var res = aiService.evaluateTaskCompletion(task.getTitle(), task.getDescription(), file);
 
-            List<Achievement> newAchievements = awarderService.awardTaskCompletion(res, task, profile);
-            List<AchievementOutput> achievementOutputs = newAchievements.stream()
+            var award = awarderService.awardTaskCompletion(res, task, profile);
+            List<AchievementOutput> achievementOutputs = award.newAchievements().stream()
                     .map(AchievementOutput::of).toList();
 
             return ResponseEntity.ok(Map.of(
                     "evaluation", res,
-                    "newAchievements", achievementOutputs
+                    "newAchievements", achievementOutputs,
+                    "boostPercent", award.boostPercent()
             ));
         } catch (BadRequestException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

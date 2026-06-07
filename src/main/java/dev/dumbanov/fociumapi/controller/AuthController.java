@@ -78,8 +78,8 @@ public class AuthController {
     @PostMapping("/password-login")
     public ResponseEntity<?> login(HttpServletRequest request, HttpServletResponse response, @Valid @RequestBody PasswordLoginInput input) {
         try {
+            awarderService.manageDayStreak(input.email());
             Profile profile = authService.login(input.email(), input.password());
-awarderService.manageDayStreak(profile);
             createSession(profile, request, response);
             return ResponseEntity.ok(ProfileOutput.of(profile));
         } catch (UsernameNotFoundException e) {
