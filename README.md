@@ -80,7 +80,3 @@ Contributions are welcome! If you have any suggestions for improvements or bug f
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
----
-
-Please add the `README.md` file to the chat so I can review and approve it.
