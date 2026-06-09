@@ -25,8 +25,8 @@ public record ProfileOutput(
                 profile.getPfp(),
                 profile.getPoints(),
                 profile.getTotalPoints(),
-                profile.getLevel(),
                 profile.getDayStreak(),
+                profile.getLevel(),
                 profile.getCreatedAt(),
                 profile.getLastLogin(),
                 profile.getRoles().stream().map(Role::getName).toArray(String[]::new)

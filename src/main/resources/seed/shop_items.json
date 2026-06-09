@@ -38,6 +38,56 @@
     "durationMinutes": null,
     "pointsBoostPercent": null,
     "isActive": true
-  }
+  },
 
+  {
+    "name": "Minor Surge",
+    "description": "Quick 20% points boost for 30 minutes — great for a short session.",
+    "icon": "✨",
+    "perkType": "POINTS_BOOST",
+    "price": 75,
+    "durationMinutes": 30,
+    "pointsBoostPercent": 20,
+    "isActive": true
+  },
+  {
+    "name": "Power Hour",
+    "description": "Earn 75% more points for 60 minutes. Best value for focused work.",
+    "icon": "🚀",
+    "perkType": "POINTS_BOOST",
+    "price": 180,
+    "durationMinutes": 60,
+    "pointsBoostPercent": 75,
+    "isActive": true
+  },
+  {
+    "name": "Surge Bundle",
+    "description": "Long session boost: 50% extra points for 3 hours.",
+    "icon": "🧪",
+    "perkType": "POINTS_BOOST",
+    "price": 350,
+    "durationMinutes": 180,
+    "pointsBoostPercent": 50,
+    "isActive": true
+  },
+  {
+    "name": "Weekend Pass",
+    "description": "Full application access for 3 days — perfect for catching up on a weekend sprint.",
+    "icon": "🎟️",
+    "perkType": "APPLICATION_ACCESS",
+    "price": 60,
+    "durationMinutes": 4320,
+    "pointsBoostPercent": null,
+    "isActive": true
+  },
+  {
+    "name": "VIP Pass (1 year)",
+    "description": "VIP access and premium features for 365 days.",
+    "icon": "👑",
+    "perkType": "APPLICATION_ACCESS",
+    "price": 1200,
+    "durationMinutes": 525600,
+    "pointsBoostPercent": null,
+    "isActive": true
+  }
 ]
