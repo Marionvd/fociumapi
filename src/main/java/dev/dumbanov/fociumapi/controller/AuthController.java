@@ -10,6 +10,7 @@ import dev.dumbanov.fociumapi.entity.Profile;
 import dev.dumbanov.fociumapi.exception.BadRequestException;
 import dev.dumbanov.fociumapi.service.AuthService;
 import dev.dumbanov.fociumapi.service.AwarderService;
+import dev.dumbanov.fociumapi.service.ProfileActivationTicketService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -38,6 +40,7 @@ public class AuthController {
     private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
     private final AwarderService awarderService;
+    private final ProfileActivationTicketService profileActivationTicketService;
     private final SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
 
@@ -60,14 +63,15 @@ public class AuthController {
     }
 
     @PostMapping("/password-register")
-    public ResponseEntity<?> register(HttpServletRequest request, HttpServletResponse response, @Valid @RequestBody PasswordRegisterInput input) {
+    public ResponseEntity<?> register(@Valid @RequestBody PasswordRegisterInput input) {
         try {
             Profile profile = authService.register(input.email(), input.password());
 
-            createSession(profile, request, response);
-
             return ResponseEntity.created(URI.create("/api/profiles/" + profile.getUuid()))
-                    .body(ProfileOutput.of(profile));
+                    .body(Map.of(
+                            "message", "Account created. Please check your email to activate your account.",
+                            "profile", ProfileOutput.of(profile)
+                    ));
         } catch (BadRequestException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (RuntimeException e) {
@@ -84,8 +88,26 @@ public class AuthController {
             return ResponseEntity.ok(ProfileOutput.of(profile));
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        } catch (DisabledException e) {
+            return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         } catch (BadRequestException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<?> activate(@RequestParam String code) {
+        try {
+            profileActivationTicketService.activate(java.util.UUID.fromString(code));
+            return ResponseEntity.ok(Map.of("message", "Account activated successfully. You can now log in."));
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid activation code."));
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
