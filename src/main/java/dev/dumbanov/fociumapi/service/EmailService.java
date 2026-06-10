@@ -1,7 +1,7 @@
 package dev.dumbanov.fociumapi.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
@@ -20,16 +20,19 @@ public class EmailService {
 
     String buildResetPasswordTemplate(String email, String link) {
         return """
-                Здравейте,
-                
-                Получихме заяква за промяна на парола в приложението Focium за %s.
-                Ако вие се пратили тази заявка, моля последвайте %s за да продължите с промяната на Вашата парола.
-                Ако не се пратили тази заявка, може спокойно да игнорирате този имейл.
-                
-                Поздрави,
-                Екипът на Focium
-                """.formatted(email, link);
+            Hello,
 
+            We received a request to reset the password for your Focium account (%s).
+
+            If you made this request, please use the link below to set a new password:
+            %s
+
+            If you did not request a password reset, you can safely ignore this email.
+            Your password will remain unchanged.
+
+            Best regards,
+            The Focium Team
+            """.formatted(email, link);
     }
 
     public void sendPasswordResetEmail(String email, UUID code) {
@@ -40,6 +43,37 @@ public class EmailService {
         message.setTo(email);
         message.setFrom("fociumapp@gmail.com");
         message.setSubject("Reset Password for Focium account");
+        message.setText(content);
+        mailSender.send(message);
+    }
+
+
+    String buildProfileActivationEmail(String email, String link) {
+        return """
+            Hello,
+
+            Welcome to Focium!
+
+            Your account (%s) has been created and is waiting for activation.
+
+            Please use the link below to activate your account:
+            %s
+
+            If you did not create this account, you can safely ignore this email.
+
+            Best regards,
+            The Focium Team
+            """.formatted(email, link);
+    }
+    @SuppressWarnings("unused")
+    public void sendProfileActivationEmail(String email, UUID code) throws MailException {
+        String link = frontendUrl + "/activate-account?code=" + code;
+        String content = buildProfileActivationEmail(email, link);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setFrom("fociumapp@gmail.com");
+        message.setSubject("Activate your Focium account");
         message.setText(content);
         mailSender.send(message);
     }
