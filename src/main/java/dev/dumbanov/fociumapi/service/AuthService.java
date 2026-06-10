@@ -8,7 +8,7 @@ import dev.dumbanov.fociumapi.repository.PasswordResetTicketRepository;
 import dev.dumbanov.fociumapi.repository.ProfileRepository;
 import dev.dumbanov.fociumapi.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordResetTicketRepository passwordResetTicketRepository;
     private final EmailService emailService;
+    private final ProfileActivationTicketService profileActivationTicketService;
 
     public Profile register(String email, String password) {
         Role role = new Role();
@@ -43,8 +44,11 @@ public class AuthService {
         profile.setPassword(passwordEncoder.encode(password));
         profile.getRoles().add(role);
         profile.setLastLogin(LocalDateTime.now());
+        profile = profileRepository.save(profile);
 
-        return profileRepository.save(profile);
+        profileActivationTicketService.createTicket(profile.getEmail());
+
+        return profile;
     }
 
     public Profile login(String email, String password) {
@@ -55,6 +59,9 @@ public class AuthService {
         Profile profile = profileRepository.findProfileByEmail(email);
         if(!passwordEncoder.matches(password, profile.getPassword())) {
             throw new BadRequestException("Incorrect password. Please try again.");
+        }
+        if(!profile.getActive()) {
+            throw new DisabledException("Account is not activated. Please check your email.");
         }
         
         profile.setLastLogin(LocalDateTime.now());

@@ -32,6 +32,8 @@ public class Profile implements UserDetails {
     private Integer level = 0;
     private Integer dayStreak = 1;
 
+    private Boolean isActive = false;
+
     private String pfp="";
 
     @Column()
@@ -73,6 +75,11 @@ public class Profile implements UserDetails {
     )
     private Set<ShopItem> shopItems = new HashSet<>();
 
+
+    @Override
+    public boolean isEnabled() {
+        return isActive;
+    }
 
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
@@ -187,5 +194,13 @@ public class Profile implements UserDetails {
 
     public void setShopItems(Set<ShopItem> shopItems) {
         this.shopItems = shopItems;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 }
