@@ -18,14 +18,30 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, ProfileService profileService) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(request -> {
+                    var config = new org.springframework.web.cors.CorsConfiguration();
+                    config.setAllowedOrigins(java.util.List.of("http://localhost:3000"));
+                    config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(java.util.List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 .securityContext(context -> context
                         .securityContextRepository(new org.springframework.security.web.context.HttpSessionSecurityContextRepository())
                 )
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/profiles/**").hasRole("USER")
+                                .requestMatchers(
+                                        "/api/profiles/**",
+                                        "/api/achievements/**",
+                                        "/api/tasks/**",
+                                        "/api/shop/**",
+                                        "/api/showdowns/**",
+                                        "/api/showdown-requests/**",
+                                        "/api/leaderboard/**"
+                                ).hasRole("USER")
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .userDetailsService(profileService)

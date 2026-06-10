@@ -1,0 +1,25 @@
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: SSH → pull → rebuild
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key:      ${{ secrets.SSH_PRIVATE_KEY }}
+          port:     ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd ${{ secrets.BACKEND_DIR }}
+            git pull origin main
+            docker compose up --build -d --no-deps api
+            docker image prune -f

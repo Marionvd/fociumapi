@@ -42,6 +42,7 @@ public class AuthService {
         profile.setEmail(email);
         profile.setPassword(passwordEncoder.encode(password));
         profile.getRoles().add(role);
+        profile.setLastLogin(LocalDateTime.now());
 
         return profileRepository.save(profile);
     }
@@ -52,11 +53,13 @@ public class AuthService {
         }
 
         Profile profile = profileRepository.findProfileByEmail(email);
-        if(passwordEncoder.matches(password, profile.getPassword())) {
-            return profile;
-        } else {
+        if(!passwordEncoder.matches(password, profile.getPassword())) {
             throw new BadRequestException("Incorrect password. Please try again.");
         }
+        
+        profile.setLastLogin(LocalDateTime.now());
+        profile = profileRepository.save(profile);
+        return profile;
     }
 
     public void requestPasswordResetTicket(String email) {

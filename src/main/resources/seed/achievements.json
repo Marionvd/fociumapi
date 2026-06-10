@@ -1,0 +1,106 @@
+[
+  {
+    "name": "First Day",
+    "description": "Log in or complete an action for 1 day",
+    "rewardPoints": 5,
+    "prerequisites": [
+      { "type": "DAY_STREAK", "requiredAmount": 1 }
+    ]
+  },
+  {
+    "name": "Three Day Momentum",
+    "description": "Keep your streak for 3 days",
+    "rewardPoints": 20,
+    "prerequisites": [
+      { "type": "DAY_STREAK", "requiredAmount": 3 }
+    ]
+  },
+  {
+    "name": "Week Strong",
+    "description": "Keep your streak for 7 days",
+    "rewardPoints": 50,
+    "prerequisites": [
+      { "type": "DAY_STREAK", "requiredAmount": 7 }
+    ]
+  },
+  {
+    "name": "Fortnight Focus",
+    "description": "Keep your streak for 14 days",
+    "rewardPoints": 120,
+    "prerequisites": [
+      { "type": "DAY_STREAK", "requiredAmount": 14 }
+    ]
+  },
+  {
+    "name": "Monthly Master",
+    "description": "Keep your streak for 30 days",
+    "rewardPoints": 300,
+    "prerequisites": [
+      { "type": "DAY_STREAK", "requiredAmount": 30 }
+    ]
+  },
+  {
+    "name": "Habit Centurion",
+    "description": "Keep your streak for 100 days",
+    "rewardPoints": 1500,
+    "prerequisites": [
+      { "type": "DAY_STREAK", "requiredAmount": 100 }
+    ]
+  },
+  {
+    "name": "Getting Started",
+    "description": "Earn 10 points",
+    "rewardPoints": 5,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 10 }
+    ]
+  },
+  {
+    "name": "On The Board",
+    "description": "Earn 50 points",
+    "rewardPoints": 20,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 50 }
+    ]
+  },
+  {
+    "name": "One Hundred Club",
+    "description": "Earn 100 points",
+    "rewardPoints": 50,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 100 }
+    ]
+  },
+  {
+    "name": "Consistently Good",
+    "description": "Earn 250 points",
+    "rewardPoints": 100,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 250 }
+    ]
+  },
+  {
+    "name": "Five Hundred Mark",
+    "description": "Earn 500 points",
+    "rewardPoints": 200,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 500 }
+    ]
+  },
+  {
+    "name": "Thousand Achiever",
+    "description": "Earn 1,000 points",
+    "rewardPoints": 500,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 1000 }
+    ]
+  },
+  {
+    "name": "Collector Supreme",
+    "description": "Earn 5,000 points",
+    "rewardPoints": 3000,
+    "prerequisites": [
+      { "type": "POINTS_AMOUNT", "requiredAmount": 5000 }
+    ]
+  }
+]
